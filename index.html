@@ -8,7 +8,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
   *{font-family:'Manrope',sans-serif;box-sizing:border-box;}
@@ -21,55 +20,54 @@
   ::-webkit-scrollbar-track{background:#111318;}
   ::-webkit-scrollbar-thumb{background:#3f3f46;border-radius:9999px;}
 </style>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { sans: ['Manrope', 'sans-serif'] }
-    }
-  }
-}
-</script>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel">
+<div id="fatal-error" style="display:none;position:fixed;inset:0;background:#111318;color:#f87171;font-family:monospace;padding:20px;overflow:auto;z-index:9999;"></div>
+<script>
+  window.addEventListener('error', function(e){
+    var box = document.getElementById('fatal-error');
+    if(box){
+      box.style.display = 'block';
+      box.innerHTML = '<h2 style="color:#fca5a5">Erro ao carregar o aplicativo</h2><pre style="white-space:pre-wrap;font-size:13px;">' +
+        (e.message || 'Erro desconhecido') + '\n\n' + (e.filename ? e.filename + ':' + e.lineno : '') + '</pre>';
+    }
+  });
+</script>
+<script type="text/babel" data-presets="react">
 const { useState, useMemo, useEffect, useRef } = React;
 
-// ── Lucide icons
-const L = window.lucide || {};
-function Icon({ name, size = 16, className = "" }) {
-  const el = useRef(null);
-  useEffect(() => {
-    if (el.current && L.createIcons) {
-      el.current.innerHTML = `<i data-lucide="${name}" style="width:${size}px;height:${size}px;display:block;"></i>`;
-      L.createIcons({ nodes: [el.current] });
-    }
-  }, [name, size]);
-  return <span ref={el} className={"inline-flex items-center justify-center " + className} style={{width:size,height:size,flexShrink:0}}/>;
+// ════════════ INLINE SVG ICONS (no external icon library / no timing issues) ═══
+function Svg({children, size=16, className="", viewBox="0 0 24 24"}){
+  return (
+    <svg width={size} height={size} viewBox={viewBox} fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      className={className} style={{flexShrink:0, display:"block"}}>
+      {children}
+    </svg>
+  );
 }
-// Shorthand icon components
-const Clock        = p => <Icon name="clock"          {...p}/>;
-const WalletIco    = p => <Icon name="wallet"         {...p}/>;
-const ChevLeft     = p => <Icon name="chevron-left"   {...p}/>;
-const ChevRight    = p => <Icon name="chevron-right"  {...p}/>;
-const TrendUp      = p => <Icon name="trending-up"    {...p}/>;
-const TrendDown    = p => <Icon name="trending-down"  {...p}/>;
-const CardIco      = p => <Icon name="credit-card"    {...p}/>;
-const Undo         = p => <Icon name="undo-2"         {...p}/>;
-const Redo         = p => <Icon name="redo-2"         {...p}/>;
-const LogOutIco    = p => <Icon name="log-out"        {...p}/>;
-const ShieldIco    = p => <Icon name="shield-check"   {...p}/>;
-const PlusIco      = p => <Icon name="plus"           {...p}/>;
-const XIco         = p => <Icon name="x"              {...p}/>;
-const TrashIco     = p => <Icon name="trash-2"        {...p}/>;
-const PinIco       = p => <Icon name="pin"            {...p}/>;
-const PinOffIco    = p => <Icon name="pin-off"        {...p}/>;
-const ScanIco      = p => <Icon name="scan-line"      {...p}/>;
-const PaletteIco   = p => <Icon name="palette"        {...p}/>;
-const CoffeeIco    = p => <Icon name="coffee"         {...p}/>;
+const ClockIcon = p => <Svg {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Svg>;
+const WalletIcon = p => <Svg {...p}><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></Svg>;
+const ChevLeft = p => <Svg {...p}><polyline points="15 18 9 12 15 6"/></Svg>;
+const ChevRight = p => <Svg {...p}><polyline points="9 18 15 12 9 6"/></Svg>;
+const TrendUp = p => <Svg {...p}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></Svg>;
+const TrendDown = p => <Svg {...p}><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></Svg>;
+const CardIcon = p => <Svg {...p}><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></Svg>;
+const UndoIcon = p => <Svg {...p}><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></Svg>;
+const RedoIcon = p => <Svg {...p}><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></Svg>;
+const LogOutIcon = p => <Svg {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></Svg>;
+const ShieldIcon = p => <Svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><polyline points="9 12 11 14 15 10"/></Svg>;
+const PlusIcon = p => <Svg {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></Svg>;
+const XIcon = p => <Svg {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Svg>;
+const TrashIcon = p => <Svg {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></Svg>;
+const PinIcon = p => <Svg {...p}><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"/></Svg>;
+const PinOffIcon = p => <Svg {...p}><line x1="2" y1="2" x2="22" y2="22"/><line x1="12" y1="17" x2="12" y2="22"/><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17h7"/><path d="M15 9.34V6h1a2 2 0 0 0 0-4H8.66"/></Svg>;
+const ScanIcon = p => <Svg {...p}><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="3" y1="12" x2="21" y2="12"/></Svg>;
+const PaletteIcon = p => <Svg {...p}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2a10 10 0 1 0 0 20c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.4-1.01a1.5 1.5 0 0 1-.4-1.01c0-.83.67-1.48 1.5-1.48H16a4 4 0 0 0 4-4c0-5-4.5-9-8-9Z"/></Svg>;
+const CoffeeIcon = p => <Svg {...p}><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></Svg>;
 
-// ── Helpers
+// ── Helpers ────────────────────────────────────────────────────────────────
 const MONTHS  = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const WSHORT  = ["DOM","SEG","TER","QUA","QUI","SEX","SAB"];
 const WFULL   = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
@@ -88,36 +86,46 @@ function fmtHM(mins){
 function fmtBRL(v){ return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}); }
 
 const FULL_DAY=480, SAT_DAY=240;
-let uid=0; const newId=()=>`i${++uid}`;
 
-// ── Persistence (localStorage fallback + window.storage if available)
-const SK="pf-v4";
+// Stable unique id generator — never reused, never collides
+let uidCounter = 0;
+function newId(prefix){
+  uidCounter += 1;
+  return `${prefix||"id"}-${Date.now().toString(36)}-${uidCounter}`;
+}
+
+// ── Persistence ──────────────────────────────────────────────────────────
+const SK="pf-v5";
 async function loadSt(){
   try{
-    if(window.storage){ const r=await window.storage.get(SK,false); return r?.value?JSON.parse(r.value):null; }
-    const v=localStorage.getItem(SK); return v?JSON.parse(v):null;
-  }catch{ return null; }
+    if(typeof window!=="undefined" && window.storage){
+      const r=await window.storage.get(SK,false);
+      return r&&r.value ? JSON.parse(r.value) : null;
+    }
+    const v=localStorage.getItem(SK);
+    return v?JSON.parse(v):null;
+  }catch(e){ return null; }
 }
 async function saveSt(s){
   try{
     const str=JSON.stringify(s);
-    if(window.storage) await window.storage.set(SK,str,false);
+    if(typeof window!=="undefined" && window.storage){ await window.storage.set(SK,str,false); }
     else localStorage.setItem(SK,str);
-  }catch{}
+  }catch(e){ /* ignore */ }
 }
 
-// ── Default finance sections
+// ── Default finance sections ───────────────────────────────────────────────
 function defSections(){
   return [
-    { id:"income", title:"Entradas",          color:"#34d399", kind:"income",  pin:false, items:[{id:newId(),label:"Salário",value:0}] },
-    { id:"invest", title:"Investimentos",      color:"#22d3ee", kind:"expense", pin:false, items:[{id:newId(),label:"Poupança",value:0}] },
-    { id:"varexp", title:"Despesas Variáveis", color:"#fb923c", kind:"expense", pin:false, items:[{id:newId(),label:"Item",value:0}] },
-    { id:"fixed",  title:"Despesas Fixas",     color:"#f87171", kind:"fixed",   pin:false, items:[{id:newId(),label:"Aluguel",value:0}] },
-    { id:"card",   title:"Gastos em Cartões",  color:"#a78bfa", kind:"card",    pin:false, items:[{id:newId(),label:"Nubank",value:0}] },
+    { id:"income", title:"Entradas",          color:"#34d399", kind:"income",  pin:false, items:[{id:newId("it"),label:"Salário",value:0}] },
+    { id:"invest", title:"Investimentos",      color:"#22d3ee", kind:"expense", pin:false, items:[{id:newId("it"),label:"Poupança",value:0}] },
+    { id:"varexp", title:"Despesas Variáveis", color:"#fb923c", kind:"expense", pin:false, items:[{id:newId("it"),label:"Item",value:0}] },
+    { id:"fixed",  title:"Despesas Fixas",     color:"#f87171", kind:"fixed",   pin:false, items:[{id:newId("it"),label:"Aluguel",value:0}] },
+    { id:"card",   title:"Gastos em Cartões",  color:"#a78bfa", kind:"card",    pin:false, items:[{id:newId("it"),label:"Nubank",value:0}] },
   ];
 }
 
-// ── OCR via Anthropic API
+// ── OCR via Anthropic API ───────────────────────────────────────────────────
 async function readPontoFromImage(dataUrl){
   const base64=dataUrl.split(",")[1];
   const mtype=dataUrl.split(";")[0].split(":")[1]||"image/jpeg";
@@ -146,13 +154,13 @@ Responda SOMENTE com JSON puro, sem texto extra, sem markdown:
   });
   if(!res.ok){ const e=await res.text().catch(()=>""); throw new Error(`API ${res.status}: ${e.slice(0,120)}`); }
   const data=await res.json();
-  const text=data.content?.find(b=>b.type==="text")?.text||"";
+  const text=(data.content||[]).find(b=>b.type==="text")?.text||"";
   const match=text.match(/\{[\s\S]*?\}/);
-  if(!match) throw new Error("Sem JSON: "+text.slice(0,80));
+  if(!match) throw new Error("Sem JSON na resposta: "+text.slice(0,80));
   return JSON.parse(match[0]);
 }
 
-// ════════════ APP ════════════════════════════════════════════════════════
+// ════════════ APP ═══════════════════════════════════════════════════════
 function App(){
   const [ready,setReady]=useState(false);
   const [user,setUser]=useState(null);
@@ -160,74 +168,95 @@ function App(){
   const [overtime,setOvertime]=useState(15.55);
   const [finData,setFinDataRaw]=useState({});
   const [globalPin,setGlobalPin]=useState(null);
-  const hist=useRef([]); const fut=useRef([]); const skip=useRef(false);
+  const [tab,setTab]=useState("ponto");
+
+  const hist=useRef([]);
+  const fut=useRef([]);
+  const skip=useRef(false);
+  const [, forceTick] = useState(0);
 
   function snap(){ return {dayData,overtime,finData,globalPin}; }
-  function pushH(){ if(skip.current) return; hist.current.push(snap()); if(hist.current.length>60) hist.current.shift(); fut.current=[]; }
-  function applySnap(s){ skip.current=true; setDayDataRaw(s.dayData); setOvertime(s.overtime); setFinDataRaw(s.finData); setGlobalPin(s.globalPin); skip.current=false; }
+  function pushH(){
+    if(skip.current) return;
+    hist.current.push(snap());
+    if(hist.current.length>60) hist.current.shift();
+    fut.current=[];
+    forceTick(t=>t+1);
+  }
+  function applySnap(s){
+    skip.current=true;
+    setDayDataRaw(s.dayData); setOvertime(s.overtime); setFinDataRaw(s.finData); setGlobalPin(s.globalPin);
+    skip.current=false;
+    forceTick(t=>t+1);
+  }
   function undo(){ const p=hist.current.pop(); if(!p) return; fut.current.push(snap()); applySnap(p); }
   function redo(){ const n=fut.current.pop(); if(!n) return; hist.current.push(snap()); applySnap(n); }
 
-  function setDayData(u){ pushH(); setDayDataRaw(typeof u==="function"?u:()=>u); }
-  function setFinData(u){ pushH(); setFinDataRaw(typeof u==="function"?u:()=>u); }
+  function setDayData(updater){ pushH(); setDayDataRaw(prev => typeof updater==="function" ? updater(prev) : updater); }
+  function setFinData(updater){ pushH(); setFinDataRaw(prev => typeof updater==="function" ? updater(prev) : updater); }
   function setOT(v){ pushH(); setOvertime(v); }
   function setGP(v){ pushH(); setGlobalPin(v); }
 
-  useEffect(()=>{(async()=>{
-    const s=await loadSt();
-    if(s){
-      if(s.dayData)   setDayDataRaw(s.dayData);
-      if(s.overtime)  setOvertime(s.overtime);
-      if(s.finData)   setFinDataRaw(s.finData);
-      if(s.globalPin) setGlobalPin(s.globalPin);
-      if(s.loggedIn)  setUser({name:"Admin"});
-    }
-    setReady(true);
-  })();},[]);
+  useEffect(()=>{
+    let cancelled=false;
+    (async()=>{
+      const s=await loadSt();
+      if(!cancelled && s){
+        if(s.dayData)   setDayDataRaw(s.dayData);
+        if(s.overtime)  setOvertime(s.overtime);
+        if(s.finData)   setFinDataRaw(s.finData);
+        if(s.globalPin) setGlobalPin(s.globalPin);
+        if(s.loggedIn)  setUser({name:"Admin"});
+      }
+      if(!cancelled) setReady(true);
+    })();
+    return ()=>{ cancelled=true; };
+  },[]);
 
   useEffect(()=>{
     if(!ready) return;
-    const t=setTimeout(()=>saveSt({dayData,overtime,finData,globalPin,loggedIn:!!user}),500);
-    return()=>clearTimeout(t);
+    const t=setTimeout(()=>{ saveSt({dayData,overtime,finData,globalPin,loggedIn:!!user}); },500);
+    return ()=>clearTimeout(t);
   },[dayData,overtime,finData,globalPin,user,ready]);
 
-  const [tab,setTab]=useState("ponto");
+  if(!ready){
+    return (
+      <div className="min-h-screen bg-[#111318] flex items-center justify-center">
+        <ClockIcon size={24} className="text-zinc-600"/>
+      </div>
+    );
+  }
 
-  if(!ready) return (
-    <div className="min-h-screen bg-[#111318] flex items-center justify-center">
-      <Clock size={24} className="text-zinc-600"/>
-    </div>
-  );
-
-  if(!user) return <LoginScreen onLogin={()=>setUser({name:"Admin"})}/>;
+  if(!user){
+    return <LoginScreen onLogin={()=>setUser({name:"Admin"})}/>;
+  }
 
   return (
     <div className="min-h-screen bg-[#111318] text-zinc-100 pb-12">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#111318] border-b border-zinc-800 px-4 pt-5 pb-3 flex items-center justify-between" style={{backgroundColor:"rgba(17,19,24,0.97)"}}>
+      <div className="sticky top-0 z-30 border-b border-zinc-800 px-4 pt-5 pb-3 flex items-center justify-between" style={{backgroundColor:"rgba(17,19,24,0.97)",backdropFilter:"blur(8px)"}}>
         <div>
           <div className="text-base font-bold leading-none text-zinc-100">Ponto &amp; Finanças</div>
           <div className="text-xs text-zinc-500 mt-0.5 flex items-center gap-1">
-            <ShieldIco size={10} className="text-emerald-400"/> Admin
+            <ShieldIcon size={10} className="text-emerald-400"/> Admin
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="flex bg-zinc-900 border border-zinc-800 rounded-full p-0.5">
             <button onClick={undo} disabled={!hist.current.length}
               className="p-1.5 text-zinc-400 hover:text-white disabled:opacity-25 transition rounded-full">
-              <Undo size={14}/>
+              <UndoIcon size={14}/>
             </button>
             <button onClick={redo} disabled={!fut.current.length}
               className="p-1.5 text-zinc-400 hover:text-white disabled:opacity-25 transition rounded-full">
-              <Redo size={14}/>
+              <RedoIcon size={14}/>
             </button>
           </div>
           <div className="flex bg-zinc-900 border border-zinc-800 rounded-full p-0.5">
-            <TabBtn active={tab==="ponto"}    onClick={()=>setTab("ponto")}    label="Ponto"    icon={<Clock size={12}/>}/>
-            <TabBtn active={tab==="financas"} onClick={()=>setTab("financas")} label="Finanças" icon={<WalletIco size={12}/>}/>
+            <TabBtn active={tab==="ponto"}    onClick={()=>setTab("ponto")}    label="Ponto"    icon={<ClockIcon size={12}/>}/>
+            <TabBtn active={tab==="financas"} onClick={()=>setTab("financas")} label="Finanças" icon={<WalletIcon size={12}/>}/>
           </div>
           <button onClick={()=>setUser(null)} className="p-2 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white transition">
-            <LogOutIco size={13}/>
+            <LogOutIcon size={13}/>
           </button>
         </div>
       </div>
@@ -249,7 +278,7 @@ function TabBtn({active,onClick,label,icon}){
   );
 }
 
-// ════════════ LOGIN ══════════════════════════════════════════════════════
+// ════════════ LOGIN ═══════════════════════════════════════════════════════
 function LoginScreen({onLogin}){
   return (
     <div className="min-h-screen flex items-center justify-center px-5 relative overflow-hidden bg-[#111318]">
@@ -257,28 +286,29 @@ function LoginScreen({onLogin}){
       <div className="absolute -bottom-40 -right-20 w-80 h-80 rounded-full pointer-events-none" style={{background:"radial-gradient(circle,rgba(34,211,238,0.07),transparent)"}}/>
       <div className="w-full max-w-xs relative flex flex-col items-center text-zinc-100">
         <div className="w-16 h-16 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-5 relative">
-          <Clock size={30} className="text-emerald-400"/>
+          <ClockIcon size={30} className="text-emerald-400"/>
           <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-zinc-950 border border-zinc-800 flex items-center justify-center">
-            <WalletIco size={12} className="text-cyan-400"/>
+            <WalletIcon size={12} className="text-cyan-400"/>
           </div>
         </div>
         <h1 className="text-2xl font-extrabold text-white mb-1">Ponto &amp; Finanças</h1>
         <p className="text-xs text-zinc-500 mb-10">Controle de jornada e orçamento</p>
         <button onClick={onLogin}
           className="w-full bg-white text-zinc-900 font-extrabold text-base py-4 rounded-2xl hover:bg-zinc-100 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg">
-          <ShieldIco size={18} className="text-emerald-600"/> Entrar como Admin
+          <ShieldIcon size={18} className="text-emerald-600"/> Entrar como Admin
         </button>
       </div>
     </div>
   );
 }
 
-// ════════════ PONTO TAB ══════════════════════════════════════════════════
+// ════════════ PONTO TAB ═══════════════════════════════════════════════════
 function PontoTab({dayData,setDayData,overtime,setOvertime}){
   const today=new Date();
   const [year,setYear]=useState(today.getFullYear());
   const [month,setMonth]=useState(today.getMonth());
   const [editOT,setEditOT]=useState(false);
+  const [otDraft,setOtDraft]=useState(String(overtime));
   const [scanning,setScanning]=useState(false);
   const [scanMsg,setScanMsg]=useState(null);
   const scanRef=useRef(null);
@@ -293,7 +323,13 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
   while(cells.length%7!==0) cells.push({d:cells.length-wd1st-numDays+1,out:true});
 
   function getDay(k){ return dayData[k]||{type:"normal",e:{}}; }
-  function updDay(k,fn){ setDayData(p=>{ const cur=JSON.parse(JSON.stringify(p[k]||{type:"normal",e:{}})); return {...p,[k]:fn(cur)}; }); }
+  function updDay(k,fn){
+    setDayData(prev=>{
+      const cur=JSON.parse(JSON.stringify(prev[k]||{type:"normal",e:{}}));
+      const next=fn(cur);
+      return {...prev,[k]:next};
+    });
+  }
   function toggleType(k,t){ updDay(k,d=>{ d.type=d.type===t?"normal":t; return d; }); }
   function setT(k,f,v){ updDay(k,d=>{ d.e=d.e||{}; d.e[f]=v; return d; }); }
 
@@ -326,8 +362,8 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
   const balMin=summ.ot-summ.owed, balMon=(balMin/60)*overtime;
 
   function applyColor(color){
-    setDayData(p=>{
-      const n={...p};
+    setDayData(prev=>{
+      const n={...prev};
       for(let d=1;d<=numDays;d++){
         const wk=new Date(year,month,d).getDay(); if(wk===0) continue;
         const k=dkey(year,month,d);
@@ -338,18 +374,19 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
   }
 
   async function handleScanFile(e){
-    const file=e.target.files?.[0]; if(!file) return;
+    const file=e.target.files && e.target.files[0]; if(!file) return;
     setScanning(true); setScanMsg(null);
     try{
       const dataUrl=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=ev=>res(ev.target.result); r.onerror=rej; r.readAsDataURL(file); });
-      const{date,time}=await readPontoFromImage(dataUrl);
+      const result=await readPontoFromImage(dataUrl);
+      const date=result.date, time=result.time;
       if(!date&&!time){ setScanMsg("Não encontrei data/hora na imagem."); setScanning(false); e.target.value=""; return; }
       let k=null;
-      if(date){ const[dd,mm,yyyy]=date.split("/").map(Number); if(dd&&mm&&yyyy) k=dkey(yyyy,mm-1,dd); }
+      if(date){ const parts=date.split("/").map(Number); const dd=parts[0],mm=parts[1],yyyy=parts[2]; if(dd&&mm&&yyyy) k=dkey(yyyy,mm-1,dd); }
       if(!k){ const n=new Date(); k=dkey(n.getFullYear(),n.getMonth(),n.getDate()); }
       if(time){
-        const[ky,km,kd]=k.split("-").map(Number);
-        const wk=new Date(ky,km-1,kd).getDay(), isSat=wk===6;
+        const kparts=k.split("-").map(Number);
+        const wk=new Date(kparts[0],kparts[1]-1,kparts[2]).getDay(), isSat=wk===6;
         const order=isSat?["entrada","saida"]:["entrada","saidaAlmoco","voltaAlmoco","saida"];
         let filled=null;
         setDayData(prev=>{
@@ -372,7 +409,7 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
     <main className="max-w-md mx-auto px-4 py-4 space-y-4">
 
       {/* Calendar */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4" style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
+      <div className="rounded-2xl p-4 border border-zinc-800" style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
         <div className="flex items-center justify-between mb-3">
           <button onClick={prevMon} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 transition"><ChevLeft size={16}/></button>
           <h2 className="text-sm font-bold text-zinc-100">{MONTHS[month]} <span className="text-zinc-500 font-medium">{year}</span></h2>
@@ -386,7 +423,7 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
         </div>
         <div className="grid grid-cols-7 gap-1">
           {cells.map((c,i)=>{
-            if(c.out) return <div key={i} className="aspect-square flex items-center justify-center text-xs text-zinc-700">{c.d>0?c.d:""}</div>;
+            if(c.out) return <div key={"o"+i} className="aspect-square flex items-center justify-center text-xs text-zinc-700">{c.d>0?c.d:""}</div>;
             const k=dkey(year,month,c.d), dd=getDay(k);
             const wk=(wd1st+(c.d-1))%7, isSun=wk===0, isSat=wk===6;
             const isToday=c.d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
@@ -398,7 +435,7 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
             else if(isSat) cls="text-emerald-400";
             if(isToday) cls="bg-emerald-400 text-zinc-900 font-extrabold";
             return (
-              <button key={i}
+              <button key={k}
                 onClick={()=>{ if(!isSun) toggleType(k,"feriado"); }}
                 onContextMenu={e=>{ e.preventDefault(); if(!isSun) toggleType(k,"folga"); }}
                 className={`relative aspect-square rounded-lg text-sm font-semibold flex items-center justify-center transition ${cls}`}>
@@ -419,9 +456,10 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
 
       {/* Scanner */}
       <div>
-        <button onClick={()=>scanRef.current?.click()} disabled={scanning}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-zinc-900 border border-zinc-800 text-sm font-bold text-zinc-200 hover:bg-zinc-800 transition disabled:opacity-50">
-          <ScanIco size={16} className={scanning?"text-emerald-400":"text-zinc-400"}/>
+        <button onClick={()=>scanRef.current && scanRef.current.click()} disabled={scanning}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-zinc-800 text-sm font-bold text-zinc-200 hover:bg-zinc-800 transition disabled:opacity-50"
+          style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
+          <ScanIcon size={16} className={scanning?"text-emerald-400":"text-zinc-400"}/>
           {scanning?"Analisando imagem com IA...":"Escanear ponto"}
         </button>
         <input ref={scanRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleScanFile}/>
@@ -429,26 +467,26 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
       </div>
 
       {/* Resumo */}
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4" style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
+      <div className="rounded-2xl p-4 border border-zinc-800" style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400">Resumo do mês</h3>
           <div className="flex items-center gap-1 text-xs text-zinc-500">
             H.extra:&nbsp;
             {editOT
-              ? <input autoFocus type="number" step="0.01" value={overtime}
-                  onChange={e=>setOvertime(Number(e.target.value))}
-                  onBlur={()=>setEditOT(false)}
-                  onKeyDown={e=>e.key==="Enter"&&setEditOT(false)}
+              ? <input autoFocus type="number" step="0.01" value={otDraft}
+                  onChange={e=>setOtDraft(e.target.value)}
+                  onBlur={()=>{ const n=parseFloat(otDraft); setOvertime(isNaN(n)?overtime:n); setEditOT(false); }}
+                  onKeyDown={e=>{ if(e.key==="Enter"){ const n=parseFloat(otDraft); setOvertime(isNaN(n)?overtime:n); setEditOT(false); } }}
                   className="w-16 bg-zinc-800 border border-zinc-700 rounded px-1.5 py-0.5 text-right outline-none text-zinc-100"/>
-              : <button onClick={()=>setEditOT(true)} className="text-zinc-200 underline decoration-dotted">R$ {overtime.toFixed(2)}</button>
+              : <button onClick={()=>{ setOtDraft(String(overtime)); setEditOT(true); }} className="text-zinc-200 underline decoration-dotted">R$ {overtime.toFixed(2)}</button>
             }
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
-          <SCard icon={<Clock size={13}/>}      label="TRABALHADAS"   value={fmtHM(summ.worked)} sub={`${summ.days} dias`}                  tone="neutral"/>
-          <SCard icon={<TrendUp size={13}/>}    label="HORAS EXTRAS"  value={fmtHM(summ.ot)}     sub={fmtBRL(otMon)}                         tone="pos"/>
-          <SCard icon={<TrendDown size={13}/>}  label="HORAS DEVIDAS" value={fmtHM(summ.owed)}   sub={`-${fmtBRL(owedMon)}`}                 tone="neg"/>
-          <SCard icon={<CardIco size={13}/>}    label="SALDO"         value={`${balMin>=0?"+":""}${fmtHM(balMin)}`} sub={`${balMon>=0?"+":""}${fmtBRL(balMon)}`} tone={balMin>=0?"pos":"neg"}/>
+          <SCard icon={<ClockIcon size={13}/>}   label="TRABALHADAS"   value={fmtHM(summ.worked)} sub={`${summ.days} dias`}                  tone="neutral"/>
+          <SCard icon={<TrendUp size={13}/>}     label="HORAS EXTRAS"  value={fmtHM(summ.ot)}     sub={fmtBRL(otMon)}                         tone="pos"/>
+          <SCard icon={<TrendDown size={13}/>}   label="HORAS DEVIDAS" value={fmtHM(summ.owed)}   sub={`-${fmtBRL(owedMon)}`}                 tone="neg"/>
+          <SCard icon={<CardIcon size={13}/>}    label="SALDO"         value={`${balMin>=0?"+":""}${fmtHM(balMin)}`} sub={`${balMon>=0?"+":""}${fmtBRL(balMon)}`} tone={balMin>=0?"pos":"neg"}/>
         </div>
       </div>
 
@@ -475,7 +513,7 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
                 badge=<span className="text-xs font-bold text-zinc-400 px-2.5 py-1 rounded-full bg-zinc-800">— {fmtHM(expM(isSat))}</span>;
             }
 
-            const cardStyle=color&&!isFer?{backgroundColor:color+"0d"}:{};
+            const cardBgColor = color&&!isFer ? color+"0d" : "rgba(24,27,32,0.8)";
 
             let numClass="bg-zinc-800 text-zinc-100";
             let numStyle={};
@@ -484,7 +522,7 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
             else if(color){ numStyle={backgroundColor:color+"22",color}; numClass=""; }
 
             return (
-              <div key={k} className="rounded-2xl border border-zinc-800 p-4 bg-zinc-900" style={{...cardStyle,backgroundColor:cardStyle.backgroundColor||"rgba(24,27,32,0.8)"}}>
+              <div key={k} className="rounded-2xl border border-zinc-800 p-4" style={{backgroundColor:cardBgColor}}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-base font-extrabold flex-shrink-0 ${numClass}`} style={numStyle}>
@@ -503,11 +541,11 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
                 {(isFer||isFol)?(
                   <p className="text-sm text-zinc-600">Sem registro de ponto</p>
                 ):isSat?(
-                  <TimeRow icon={<Clock size={14}/>} label="AM" left={e.entrada} onLeft={v=>setT(k,"entrada",v)} right={e.saida} onRight={v=>setT(k,"saida",v)}/>
+                  <TimeRow icon={<ClockIcon size={14}/>} label="AM" left={e.entrada} onLeft={v=>setT(k,"entrada",v)} right={e.saida} onRight={v=>setT(k,"saida",v)}/>
                 ):(<>
-                  <TimeRow icon={<Clock size={14}/>} label="AM" left={e.entrada} onLeft={v=>setT(k,"entrada",v)} right={e.saidaAlmoco} onRight={v=>setT(k,"saidaAlmoco",v)}/>
+                  <TimeRow icon={<ClockIcon size={14}/>} label="AM" left={e.entrada} onLeft={v=>setT(k,"entrada",v)} right={e.saidaAlmoco} onRight={v=>setT(k,"saidaAlmoco",v)}/>
                   <div className="mt-2">
-                    <TimeRow icon={<CoffeeIco size={14}/>} label="PM" left={e.voltaAlmoco} onLeft={v=>setT(k,"voltaAlmoco",v)} right={e.saida} onRight={v=>setT(k,"saida",v)}/>
+                    <TimeRow icon={<CoffeeIcon size={14}/>} label="PM" left={e.voltaAlmoco} onLeft={v=>setT(k,"voltaAlmoco",v)} right={e.saida} onRight={v=>setT(k,"saida",v)}/>
                   </div>
                 </>)}
 
@@ -527,13 +565,14 @@ function PontoTab({dayData,setDayData,overtime,setOvertime}){
 }
 
 function ColorDot({onChange,title}){
-  const id=useRef("cd-"+Math.random().toString(36).slice(2));
+  const idRef=useRef(null);
+  if(!idRef.current) idRef.current = newId("cd");
   return (
-    <label htmlFor={id.current}
+    <label htmlFor={idRef.current}
       className="w-7 h-7 rounded-lg border border-zinc-700 hover:border-zinc-400 bg-zinc-800 flex items-center justify-center cursor-pointer transition"
       title={title}>
-      <PaletteIco size={15} className="text-zinc-400"/>
-      <input id={id.current} type="color" defaultValue="#4ade80"
+      <PaletteIcon size={15} className="text-zinc-400"/>
+      <input id={idRef.current} type="color" defaultValue="#4ade80"
         onChange={e=>onChange(e.target.value)} className="sr-only"/>
     </label>
   );
@@ -570,7 +609,14 @@ function TBox({value,onChange}){
   );
 }
 
-// ════════════ FINANÇAS TAB ═══════════════════════════════════════════════
+// ════════════ FINANÇAS TAB ════════════════════════════════════════════════
+//
+// IMPORTANT FIX: all updates below are fully immutable (no JSON deep-clone
+// mutation tricks), and every item/section uses a stable unique `id` as the
+// React `key`. This eliminates the "duplicate typing" bug that happens when
+// React reuses a DOM input across re-renders because of unstable keys or
+// because the update function mutated a shared object reference.
+//
 function FinTab({finData,setFinData,globalPin,setGlobalPin}){
   const today=new Date();
   const [year,setYear]=useState(today.getFullYear());
@@ -580,27 +626,56 @@ function FinTab({finData,setFinData,globalPin,setGlobalPin}){
   function prevMon(){ if(month===0){setMonth(11);setYear(y=>y-1);}else setMonth(m=>m-1); }
   function nextMon(){ if(month===11){setMonth(0);setYear(y=>y+1);}else setMonth(m=>m+1); }
 
-  const sections=useMemo(()=>{
-    if(finData[mk]) return finData[mk];
-    if(globalPin) return globalPin.map(s=>({...s,items:s.items.map(it=>({...it,id:newId()}))}));
-    return defSections();
-  },[finData,mk,globalPin]);
+  // Resolve sections for the current month, without mutating finData.
+  const sections = finData[mk]
+    ? finData[mk]
+    : (globalPin
+        ? globalPin.map(s => ({ ...s, items: s.items.map(it => ({ ...it, id: newId("it") })) }))
+        : defSections());
 
-  function updSections(fn){ setFinData(p=>({...p,[mk]:fn(JSON.parse(JSON.stringify(p[mk]||sections)))})); }
-  function updSect(id,fn){ updSections(list=>list.map(s=>s.id===id?fn({...s}):s)); }
-  function updItem(sid,iid,f,v){ updSect(sid,s=>({...s,items:s.items.map(it=>it.id===iid?{...it,[f]:v}:it)})); }
-  function addItem(sid){ updSect(sid,s=>({...s,items:[...s.items,{id:newId(),label:"Novo item",value:0}]})); }
-  function delItem(sid,iid){ updSect(sid,s=>({...s,items:s.items.filter(it=>it.id!==iid)})); }
-  function updTitle(sid,t){ updSect(sid,s=>({...s,title:t})); }
-  function updColor(sid,c){ updSect(sid,s=>({...s,color:c})); }
-  function addSection(){ updSections(list=>[...list,{id:newId(),title:"Nova lista",color:"#38bdf8",kind:"expense",pin:false,items:[{id:newId(),label:"Item",value:0}]}]); }
-  function delSection(sid){ updSections(list=>list.filter(s=>s.id!==sid)); }
+  // Ensures finData[mk] exists before any mutation, then applies fn immutably.
+  function withSections(fn){
+    setFinData(prev=>{
+      const base = prev[mk] ? prev[mk] : sections;
+      const next = fn(base);
+      return { ...prev, [mk]: next };
+    });
+  }
+
+  function updSect(id, fn){
+    withSections(list => list.map(s => s.id===id ? fn(s) : s));
+  }
+  function updItem(sid, iid, field, value){
+    updSect(sid, s => ({
+      ...s,
+      items: s.items.map(it => it.id===iid ? { ...it, [field]: value } : it)
+    }));
+  }
+  function addItem(sid){
+    updSect(sid, s => ({
+      ...s,
+      items: [...s.items, { id: newId("it"), label: "Novo item", value: 0 }]
+    }));
+  }
+  function delItem(sid, iid){
+    updSect(sid, s => ({ ...s, items: s.items.filter(it => it.id!==iid) }));
+  }
+  function updTitle(sid, t){ updSect(sid, s => ({ ...s, title: t })); }
+  function updColor(sid, c){ updSect(sid, s => ({ ...s, color: c })); }
+  function addSection(){
+    withSections(list => [...list, {
+      id: newId("sec"), title:"Nova lista", color:"#38bdf8", kind:"expense", pin:false,
+      items:[{ id:newId("it"), label:"Item", value:0 }]
+    }]);
+  }
+  function delSection(sid){ withSections(list => list.filter(s=>s.id!==sid)); }
   function togglePin(sid){
-    const current=finData[mk]||sections;
-    const updated=current.map(s=>s.id===sid?{...s,pin:!s.pin}:s);
-    setFinData(p=>({...p,[mk]:updated}));
-    const pinned=updated.filter(s=>s.pin);
-    setGlobalPin(pinned.length>0?pinned:null);
+    withSections(list => {
+      const updated = list.map(s => s.id===sid ? { ...s, pin: !s.pin } : s);
+      const pinned = updated.filter(s=>s.pin);
+      setGlobalPin(pinned.length>0 ? pinned : null);
+      return updated;
+    });
   }
 
   function sum(items){ return items.reduce((a,it)=>a+(Number(it.value)||0),0); }
@@ -620,7 +695,7 @@ function FinTab({finData,setFinData,globalPin,setGlobalPin}){
 
   return (
     <main className="max-w-md mx-auto px-4 py-4 space-y-3">
-      <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-2xl px-3 py-2.5">
+      <div className="flex items-center justify-between rounded-2xl px-3 py-2.5 border border-zinc-800" style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
         <button onClick={prevMon} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 transition"><ChevLeft size={16}/></button>
         <span className="text-sm font-bold text-zinc-100">{MONTHS[month]} <span className="text-zinc-500 font-medium">{year}</span></span>
         <button onClick={nextMon} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 transition"><ChevRight size={16}/></button>
@@ -638,15 +713,15 @@ function FinTab({finData,setFinData,globalPin,setGlobalPin}){
 
       <button onClick={addSection}
         className="w-full py-3 rounded-2xl border border-dashed border-zinc-700 text-xs font-semibold text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 transition flex items-center justify-center gap-2">
-        <PlusIco size={14}/> Adicionar seção personalizada
+        <PlusIcon size={14}/> Adicionar seção personalizada
       </button>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+      <div className="rounded-2xl p-4 border border-zinc-800" style={{backgroundColor:"rgba(24,27,32,0.9)"}}>
         <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-400 mb-3">Resultado do mês</h3>
         <div className="grid grid-cols-3 gap-2">
           <ResCard icon={<TrendUp size={13}/>}   label="ENTRADAS" value={fmtBRL(totalIn)}  tone="pos"/>
           <ResCard icon={<TrendDown size={13}/>} label="SAÍDAS"   value={fmtBRL(totalOut)} tone="neg"/>
-          <ResCard icon={<CardIco size={13}/>}   label="SALDO"    value={`${balance>=0?"+":""}${fmtBRL(balance)}`} tone={balance>=0?"pos":"neg"}/>
+          <ResCard icon={<CardIcon size={13}/>}  label="SALDO"    value={`${balance>=0?"+":""}${fmtBRL(balance)}`} tone={balance>=0?"pos":"neg"}/>
         </div>
       </div>
     </main>
@@ -655,26 +730,32 @@ function FinTab({finData,setFinData,globalPin,setGlobalPin}){
 
 function FinSection({section,total,rawTotal,fixedTotal,onAddItem,onUpdItem,onDelItem,onTitle,onColor,onPin,onDel}){
   const [editTitle,setEditTitle]=useState(false);
+  const [titleDraft,setTitleDraft]=useState(section.title);
   const c=section.color||"#6b7280";
+
+  useEffect(()=>{ setTitleDraft(section.title); },[section.title]);
+
   return (
-    <div className="border border-zinc-800 rounded-2xl p-4" style={{backgroundColor:"rgba(24,27,32,0.85)"}}>
+    <div className="rounded-2xl p-4 border border-zinc-800" style={{backgroundColor:"rgba(24,27,32,0.85)"}}>
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <SectionColorPicker color={c} onChange={onColor}/>
           {editTitle
-            ? <input autoFocus value={section.title} onChange={e=>onTitle(e.target.value)}
-                onBlur={()=>setEditTitle(false)} onKeyDown={e=>e.key==="Enter"&&setEditTitle(false)}
+            ? <input autoFocus value={titleDraft}
+                onChange={e=>setTitleDraft(e.target.value)}
+                onBlur={()=>{ onTitle(titleDraft.trim()||section.title); setEditTitle(false); }}
+                onKeyDown={e=>{ if(e.key==="Enter"){ onTitle(titleDraft.trim()||section.title); setEditTitle(false); } }}
                 className="bg-transparent text-sm font-bold outline-none border-b border-zinc-600 text-zinc-100 flex-1 min-w-0"/>
-            : <button onClick={()=>setEditTitle(true)} className="text-sm font-bold text-zinc-100 truncate text-left hover:text-zinc-300 transition">{section.title}</button>
+            : <button onClick={()=>{ setTitleDraft(section.title); setEditTitle(true); }} className="text-sm font-bold text-zinc-100 truncate text-left hover:text-zinc-300 transition">{section.title}</button>
           }
         </div>
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <span className="text-sm font-extrabold" style={{color:c}}>{fmtBRL(total)}</span>
           <button onClick={onPin} title={section.pin?"Fixado para todos os meses":"Fixar para todos os meses"}
             className={`p-1.5 rounded-lg border transition ${section.pin?"bg-zinc-200 border-zinc-200 text-zinc-900":"border-zinc-700 text-zinc-500 hover:bg-zinc-800"}`}>
-            {section.pin?<PinIco size={12}/>:<PinOffIco size={12}/>}
+            {section.pin?<PinIcon size={12}/>:<PinOffIcon size={12}/>}
           </button>
-          {onDel&&<button onClick={onDel} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 border border-zinc-700"><TrashIco size={12}/></button>}
+          {onDel&&<button onClick={onDel} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 border border-zinc-700"><TrashIcon size={12}/></button>}
         </div>
       </div>
 
@@ -684,33 +765,52 @@ function FinSection({section,total,rawTotal,fixedTotal,onAddItem,onUpdItem,onDel
 
       <div className="space-y-1.5">
         {section.items.map(it=>(
-          <div key={it.id} className="flex items-center gap-2">
-            <input value={it.label} onChange={e=>onUpdItem(it.id,"label",e.target.value)}
-              className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-2 text-xs outline-none text-zinc-200" style={{background:"rgba(9,9,11,0.8)"}}/>
-            <div className="flex items-center border border-zinc-800 rounded-lg overflow-hidden" style={{background:"rgba(9,9,11,0.8)"}}>
-              <span className="text-xs text-zinc-500 pl-2 select-none">R$</span>
-              <input type="number" value={it.value} onChange={e=>onUpdItem(it.id,"value",e.target.value)}
-                className="w-20 bg-transparent px-1.5 py-2 text-xs text-right outline-none text-zinc-200"/>
-            </div>
-            <button onClick={()=>onDelItem(it.id)} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 flex-shrink-0"><XIco size={12}/></button>
-          </div>
+          <FinItemRow key={it.id} item={it} onUpdate={onUpdItem} onDelete={onDelItem}/>
         ))}
       </div>
       <button onClick={onAddItem} className="mt-2.5 flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition font-semibold">
-        <PlusIco size={12}/> Adicionar item
+        <PlusIcon size={12}/> Adicionar item
+      </button>
+    </div>
+  );
+}
+
+// Each item row is its own component so React can match it reliably by key
+// and never confuses one input's content with another's while typing.
+function FinItemRow({item,onUpdate,onDelete}){
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        value={item.label}
+        onChange={e=>onUpdate(item.id,"label",e.target.value)}
+        className="flex-1 rounded-lg px-2.5 py-2 text-xs outline-none text-zinc-200 border border-zinc-800"
+        style={{background:"rgba(9,9,11,0.8)"}}
+      />
+      <div className="flex items-center rounded-lg overflow-hidden border border-zinc-800" style={{background:"rgba(9,9,11,0.8)"}}>
+        <span className="text-xs text-zinc-500 pl-2 select-none">R$</span>
+        <input
+          type="number"
+          value={item.value}
+          onChange={e=>onUpdate(item.id,"value", e.target.value===""? "" : Number(e.target.value))}
+          className="w-20 bg-transparent px-1.5 py-2 text-xs text-right outline-none text-zinc-200"
+        />
+      </div>
+      <button onClick={()=>onDelete(item.id)} className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 flex-shrink-0">
+        <XIcon size={12}/>
       </button>
     </div>
   );
 }
 
 function SectionColorPicker({color,onChange}){
-  const id=useRef("cp-"+Math.random().toString(36).slice(2));
+  const idRef=useRef(null);
+  if(!idRef.current) idRef.current = newId("cp");
   return (
-    <label htmlFor={id.current}
+    <label htmlFor={idRef.current}
       className="w-5 h-5 rounded-full border-2 border-zinc-600 hover:border-zinc-300 transition flex-shrink-0 cursor-pointer block"
       style={{backgroundColor:color}}
       title="Alterar cor da seção">
-      <input id={id.current} type="color" value={color}
+      <input id={idRef.current} type="color" value={color}
         onChange={e=>onChange(e.target.value)} className="sr-only"/>
     </label>
   );
@@ -728,7 +828,8 @@ function ResCard({icon,label,value,tone}){
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+const rootEl = document.getElementById("root");
+ReactDOM.createRoot(rootEl).render(<App/>);
 </script>
 </body>
 </html>
