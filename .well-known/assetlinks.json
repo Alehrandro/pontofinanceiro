@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.alehrandro.twa",
+        "sha256_cert_fingerprints": ["30:69:DE:24:84:53:EE:13:7C:1A:8B:2D:0B:AD:28:4F:C3:76:1B:8A:6E:77:58:90:D3:67:BD:FA:0C:F1:EE:AF"]
+      }
+    }]
