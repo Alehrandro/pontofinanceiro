@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lançamento de OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="tag-dot"></span>
+    <h1 id="sectorName" class="sector-name" title="Clique para editar (admin)">CABEÇOTES</h1>
+  </div>
+  <div class="topbar-right">
+    <div class="month-nav">
+      <button id="prevMonthBtn" class="icon-btn" title="Mês anterior">‹</button>
+      <span id="monthLabel" class="month-label">—</span>
+      <button id="nextMonthBtn" class="icon-btn" title="Próximo mês">›</button>
+    </div>
+    <button id="manageClientsBtn" class="btn-ghost">Clientes</button>
+  </div>
+</header>
+
+<nav class="main-tabs">
+  <button class="main-tab active" data-tab="servicos">Serviços</button>
+  <button class="main-tab" data-tab="financeiro">Financeiro</button>
+  <button class="main-tab" data-tab="investimentos">Investimentos</button>
+</nav>
+
+<div id="tab-servicos" class="tab-panel">
+
+<!-- Vista: Calendário do mês -->
+<section id="calendarView" class="calendar-wrap">
+  <div class="calendar-weekdays">
+    <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
+  </div>
+  <div id="calendarGrid" class="calendar-grid"></div>
+
+  <h3 class="section-heading">Dias com serviço (até hoje)</h3>
+  <div id="serviceDaysList" class="days-list"></div>
+
+  <h3 class="section-heading">Horas extras</h3>
+  <div class="inline-form">
+    <input id="otDate" type="date" class="input" />
+    <input id="otHours" type="text" inputmode="decimal" class="input" placeholder="Horas (opcional)" />
+    <input id="otValue" type="text" inputmode="decimal" class="input" placeholder="Valor R$" />
+    <button id="otAddBtn" class="btn-primary">Lançar</button>
+  </div>
+  <div id="otList" class="fin-list"></div>
+  <p class="hint">Cada lançamento entra automaticamente na lista de entradas do Financeiro.</p>
+</section>
+
+<!-- Vista: Dia de serviços -->
+<section id="dayView" class="day-view-wrap hidden">
+  <button id="backToCalendarBtn" class="back-btn">‹ Voltar ao calendário</button>
+  <div class="day-view-header">
+    <div class="day-view-title">
+      <h2 id="dayViewTitle">—</h2>
+      <span id="dayViewSubtitle" class="day-view-subtitle"></span>
+    </div>
+    <button id="dayViewCreateBtn" class="btn-primary create-os-btn">+ Criar OS</button>
+  </div>
+  <div id="dayViewList" class="services-list"></div>
+</section>
+
+</div><!-- /tab-servicos -->
+
+<!-- Aba: Financeiro -->
+<div id="tab-financeiro" class="tab-panel hidden">
+  <section class="panel-wrap">
+    <label class="field-label">Meu salário (R$)</label>
+    <input id="finSalary" type="text" inputmode="decimal" class="input salary-input" placeholder="0,00" />
+
+    <div class="fin-summary">
+      <div><span>Entradas</span><strong id="finTotalIn">R$ 0,00</strong></div>
+      <div><span>Saídas</span><strong id="finTotalOut">R$ 0,00</strong></div>
+      <div><span>Saldo</span><strong id="finBalance">R$ 0,00</strong></div>
+    </div>
+
+    <h3 class="section-heading">Entradas</h3>
+    <div class="inline-form">
+      <input id="inName" type="text" class="input" placeholder="Descrição" />
+      <input id="inValue" type="text" inputmode="decimal" class="input" placeholder="Valor R$" />
+      <button id="inAddBtn" class="btn-primary">Adicionar</button>
+    </div>
+    <div id="listEntradas" class="fin-list"></div>
+
+    <h3 class="section-heading">Saídas</h3>
+    <div class="inline-form">
+      <input id="outName" type="text" class="input" placeholder="Descrição" />
+      <input id="outValue" type="text" inputmode="decimal" class="input" placeholder="Valor R$" />
+      <button id="outAddBtn" class="btn-primary">Adicionar</button>
+    </div>
+    <div id="listSaidas" class="fin-list"></div>
+    <p class="hint">Segure e arraste o ⋮⋮ para reorganizar os itens.</p>
+  </section>
+</div>
+
+<!-- Aba: Guia de investimentos -->
+<div id="tab-investimentos" class="tab-panel hidden">
+  <section class="panel-wrap">
+    <p id="investSalary" class="invest-salary"></p>
+    <div id="investCards" class="invest-cards"></div>
+  </section>
+</div>
+
+<!-- Modal: Detalhe / Edição de Serviço -->
+<div id="serviceModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-header">
+      <span class="modal-eyebrow">Ordem de Serviço</span>
+      <div class="client-select-row">
+        <select id="svcClientSelect" class="input"></select>
+        <input id="svcClientColor" type="color" class="color-input" title="Cor do cliente" />
+      </div>
+    </div>
+
+    <label class="field-label">Data do serviço</label>
+    <input id="svcDate" type="date" class="input" />
+
+    <label class="field-label">Descrição do serviço</label>
+    <textarea id="svcDescription" class="input textarea" rows="4" placeholder="Ex: Retífica de cabeçote, troca de guias e sedes..."></textarea>
+
+    <label class="field-label">Status</label>
+    <div class="status-row">
+      <button id="svcStatusDone" class="status-btn status-done" data-status="done">✓ Concluído</button>
+      <button id="svcStatusPending" class="status-btn status-pending" data-status="pending">◷ Pendente</button>
+      <button id="svcStatusPostponed" class="status-btn status-postponed" data-status="postponed">✕ Adiado</button>
+    </div>
+
+    <label class="field-label">Imagens das peças</label>
+    <div class="images-toolbar">
+      <label class="btn-small file-btn">
+        Adicionar imagem
+        <input id="svcImageInput" type="file" accept="image/*" multiple hidden />
+      </label>
+    </div>
+    <div id="svcImagesGrid" class="images-grid"></div>
+
+    <div class="modal-footer">
+      <button id="svcDeleteBtn" class="btn-danger">Excluir OS</button>
+      <button id="svcSaveBtn" class="btn-primary">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nova OS -->
+<div id="newOSModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-header">
+      <span class="modal-eyebrow">Nova Ordem de Serviço</span>
+      <h2 class="modal-title">Preencher OS</h2>
+    </div>
+
+    <label class="field-label">Cliente</label>
+    <div class="client-select-row">
+      <select id="newOSClientSelect" class="input"></select>
+      <input id="newOSClientColor" type="color" class="color-input" title="Cor do cliente" />
+      <button id="newOSAddClientBtn" class="btn-small">+ Cliente</button>
+    </div>
+
+    <label class="field-label">Data do serviço</label>
+    <input id="newOSDate" type="date" class="input" />
+
+    <label class="field-label">Descrição do serviço</label>
+    <textarea id="newOSDescription" class="input textarea" rows="4" placeholder="Ex: Retífica de cabeçote, troca de guias e sedes..."></textarea>
+
+    <label class="field-label">Status</label>
+    <div class="status-row">
+      <button id="newOSStatusDone" class="status-btn status-done" data-status="done">✓ Concluído</button>
+      <button id="newOSStatusPending" class="status-btn status-pending selected" data-status="pending">◷ Pendente</button>
+      <button id="newOSStatusPostponed" class="status-btn status-postponed" data-status="postponed">✕ Adiado</button>
+    </div>
+
+    <label class="field-label">Imagens das peças</label>
+    <div class="images-toolbar">
+      <label class="btn-small file-btn">
+        Adicionar imagem
+        <input id="newOSImageInput" type="file" accept="image/*" multiple hidden />
+      </label>
+    </div>
+    <div id="newOSImagesGrid" class="images-grid"></div>
+
+    <div class="modal-footer">
+      <span></span>
+      <button id="newOSCreateBtn" class="btn-primary">Criar OS</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Gerenciar Clientes -->
+<div id="clientsModal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-header">
+      <span class="modal-eyebrow">Clientes cadastrados</span>
+    </div>
+
+    <div class="new-client-row">
+      <input id="newClientName" class="input" type="text" placeholder="Nome do cliente" />
+      <input id="newClientColor" class="color-input" type="color" value="#d98a3d" />
+      <button id="addClientBtn" class="btn-small">Adicionar</button>
+    </div>
+
+    <div id="clientsList" class="clients-list"></div>
+  </div>
+</div>
+
+<!-- Modal: PIN de administrador -->
+<div id="pinModal" class="modal-overlay hidden">
+  <div class="modal modal-narrow">
+    <button class="modal-close" data-close>&times;</button>
+    <div class="modal-header">
+      <span class="modal-eyebrow">Acesso administrador</span>
+      <h2 class="modal-title">Editar nome do setor</h2>
+    </div>
+    <label class="field-label">PIN de administrador</label>
+    <input id="pinInput" class="input" type="password" placeholder="••••" />
+    <p id="pinError" class="pin-error hidden">PIN incorreto.</p>
+    <div class="modal-footer">
+      <span></span>
+      <button id="pinConfirmBtn" class="btn-primary">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+<script src="finance.js"></script>
+</body>
+</html>
